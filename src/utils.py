@@ -30,3 +30,11 @@ def project_center_to_side(corners, center):
     projection_line = center - corner_1
     projection = (np.dot(side, projection_line)/side_norm**2) * side + corner_1
     return projection
+
+def compute_aspect_ratio(projection, centeroid, edge):
+    y_dist = centeroid.distance(projection)
+    x_dist_left = projection.distance(edge.boundary[0])
+    x_dist_right = projection.distance(edge.boundary[1])
+    AR_left = y_dist/x_dist_left
+    AR_right = y_dist/x_dist_right
+    return AR_left, AR_right
