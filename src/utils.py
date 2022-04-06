@@ -21,3 +21,12 @@ def load_section_geometry(section_file):
     section_addr = os.path.join(DATA_DIR, section_file)
     corners = np.loadtxt(section_addr, dtype=np.float32, delimiter=',')
     return corners
+
+def project_center_to_side(corners, center):
+    corner_1 = corners[0]
+    corner_2 = corners[1]
+    side = corner_2 - corner_1
+    side_norm = np.linalg.norm(side)
+    projection_line = center - corner_1
+    projection = (np.dot(side, projection_line)/side_norm**2) * side + corner_1
+    return projection
