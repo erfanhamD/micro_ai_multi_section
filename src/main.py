@@ -19,6 +19,7 @@ if __name__=="__main__":
 
     plt.figure()
     plt.scatter(*polygon.exterior.xy, color = 'k')
+    plt.plot(corners[:,0], corners[:,1], '--k')
     plt.scatter(*centeroid.xy, color  = 'r')
     for i in range(len(projections)):
         plt.scatter(*projections[i].xy, color = 'orange')
