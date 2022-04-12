@@ -4,6 +4,7 @@ import numpy as np
 import argparse
 from config import CONF
 import shapely
+import matplotlib.pyplot as plt
 
 DATA_DIR = CONF.DATA_DIR
 
@@ -47,6 +48,12 @@ def line_angle_calc(line):
     horizon_line = [1, 0]
     line_origin = np.array(line)[1]-np.array(line)[0]
     dot_product = np.dot(horizon_line, line_origin)
-    line_norm = np.linalg.norm(line)
+    line_norm = np.linalg.norm(np.array(line)[1]-np.array(line)[0])
     angle = np.arccos(dot_product/line_norm)
     return angle
+
+def plot_line(line):
+    """
+    Plots the line.
+    """
+    plt.plot(*line.xy)
