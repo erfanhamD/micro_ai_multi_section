@@ -33,13 +33,13 @@ def project_center_to_side(corners, center):
     projection = (np.dot(side, projection_line)/side_norm**2) * side + corner_1
     return projection
 
-def compute_aspect_ratio(projection, centeroid, edge):
+def compute_aspect_ratio(projection, centeroid, vertex, tri_type):
+    x_dist = projection.distance(vertex)
     y_dist = centeroid.distance(projection)
-    x_dist_left = projection.distance(edge.boundary[0])
-    x_dist_right = projection.distance(edge.boundary[1])
-    AR_left = y_dist/x_dist_left
-    AR_right = y_dist/x_dist_right
-    return AR_left, AR_right
+    if tri_type:
+        return x_dist/y_dist
+    else:
+        return y_dist/x_dist
 
 def line_angle_calc(line):
     """
@@ -57,3 +57,12 @@ def plot_line(line):
     Plots the line.
     """
     plt.plot(*line.xy)
+
+def tri_type(om, oc):
+    """
+    Returns the type of the triangle.
+    """
+    if line_angle_calc(om)>line_angle_calc(oc):
+        return 1
+    else:
+        return 0

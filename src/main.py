@@ -16,10 +16,9 @@ projection_lines = [LineString([projections[i], centeroid]) for i in range(len(p
 angles = np.array([utils.line_angle_calc(projection_lines[i]) for i in range(len(projection_lines))])*180/np.pi
 print(angles)
 AR_dict = {}
-for chunc_id in range(len(edges)):
-    AR_dict[chunc_id] = utils.compute_aspect_ratio(projections[chunc_id], centeroid, edges[chunc_id])
-# print(edges)
-# print(projections)
+# for chunc_id in range(len(edges)):
+#     AR_dict[chunc_id] = utils.compute_aspect_ratio(projections[chunc_id], centeroid, edges[chunc_id])
+
 
 plt.figure()
 plt.scatter(*polygon.exterior.xy, color = 'k')
