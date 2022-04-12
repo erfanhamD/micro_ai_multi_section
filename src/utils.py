@@ -3,6 +3,7 @@ import sys
 import numpy as np
 import argparse
 from config import CONF
+import shapely
 
 DATA_DIR = CONF.DATA_DIR
 
@@ -38,3 +39,14 @@ def compute_aspect_ratio(projection, centeroid, edge):
     AR_left = y_dist/x_dist_left
     AR_right = y_dist/x_dist_right
     return AR_left, AR_right
+
+def line_angle_calc(line):
+    """
+    Returns the type of the triangle.
+    """
+    horizon_line = [1, 0]
+    line_origin = np.array(line)[1]-np.array(line)[0]
+    dot_product = np.dot(horizon_line, line_origin)
+    line_norm = np.linalg.norm(line)
+    angle = np.arccos(dot_product/line_norm)
+    return angle
