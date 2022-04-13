@@ -1,5 +1,5 @@
 import numpy as np
-from shapely.geometry import LineString
+from shapely.geometry import LineString, Polygon
 class Chunk:
     def __init__(self, centroid, corner, projection):
         self.projection = projection
@@ -31,9 +31,15 @@ class Chunk:
         Returns the aspect ratio of the chunk.
         """
         x_dist = self.projection.distance(self.corner)
-        y_dist = self.centeroid.distance(self.projection)
+        y_dist = self.centroid.distance(self.projection)
         if self.tri_type():
             return x_dist/y_dist
         else:
             return y_dist/x_dist
     
+    def polygon(self):
+        """
+        Returns the polygon.
+        """
+        return Polygon([self.corner, self.centroid, self.projection])
+        
