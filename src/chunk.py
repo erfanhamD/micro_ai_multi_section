@@ -1,5 +1,7 @@
 import numpy as np
 from shapely.geometry import LineString, Polygon
+
+from utils import line_angle_calc
 class Chunk:
     def __init__(self, centroid, corner, projection):
         self.projection = projection
@@ -9,33 +11,33 @@ class Chunk:
         self.om = LineString([self.projection, self.centroid])
 
     
-    def line_angle_calc(self, line):
+    def line_angle_calc(self):
         horizon_line = [1, 0]
-        line_origin = np.array(line)[1]-np.array(line)[0]
-        dot_product = np.dot(horizon_line, line_origin)
-        line_norm = np.linalg.norm(np.array(line)[1]-np.array(line)[0])
-        angle = np.arccos(dot_product/line_norm)
+        om_dir = np.array(self.om)[1]-np.array(self.om)[0]
+        oc_dir = np.array(self.oc)[1]-np.array(self.oc)[0]
+        dot_product = np.dot(om_dir, oc_dir)
+        om_norm = np.linalg.norm(om_dir)
+        oc_norm = np.linalg.norm(oc_dir)
+        angle = np.arccos(dot_product/(om_norm*oc_norm))
         return angle
     
     def tri_type(self):
         """
         Returns the type of the triangle.
         """
-        if self.line_angle_calc(self.om)>self.line_angle_calc(self.oc):
-            return 1
-        else:
+        if self.line_angle_calc()>np.pi/4:
             return 0
+        else:
+            return 1
     
     def chunk_AR(self):
         """
         Returns the aspect ratio of the chunk.
         """
-        x_dist = self.projection.distance(self.corner)
-        y_dist = self.centroid.distance(self.projection)
         if self.tri_type():
-            return x_dist/y_dist
+            return (1/np.tan(self.line_angle_calc()))
         else:
-            return y_dist/x_dist
+            return np.tan(self.line_angle_calc())
     
     def polygon(self):
         """

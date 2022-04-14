@@ -6,7 +6,7 @@ from chunk import Chunk
 from figures import BLUE, RED, SIZE, set_limits, plot_coords, color_isvalid
 from descartes.patch import PolygonPatch
 
-corners = utils.load_section_geometry("section_2.csv")
+corners = utils.load_section_geometry("section_3.csv")
 polygon = Polygon(corners)
 vertices = polygon.boundary.coords
 centeroid = polygon.centroid
@@ -20,6 +20,7 @@ ax = fig.add_subplot(111)
 for idx, edge in enumerate(edges):
     for jdx, vertex in enumerate(edge.boundary):
         chunk = Chunk(centeroid, vertex, projections[idx])
+        chunk.tri_type()
         chunks.append(chunk)
         polygon = chunk.polygon()
         plot_coords(ax, polygon.exterior)
