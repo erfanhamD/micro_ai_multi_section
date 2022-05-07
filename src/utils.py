@@ -5,6 +5,8 @@ import argparse
 from config import CONF
 import shapely
 import matplotlib.pyplot as plt
+from shapely.geometry import Polygon, LineString
+
 
 DATA_DIR = CONF.DATA_DIR
 
@@ -66,3 +68,9 @@ def tri_type(om, oc):
         return 1
     else:
         return 0
+
+def polygon_from_corners(corners):
+    polygon = Polygon(corners)
+    vertices = polygon.boundary.coords
+    centeroid = polygon.centroid
+    return polygon, vertices, centeroid
