@@ -2,9 +2,12 @@ import numpy as np
 from shapely.geometry import Polygon, LineString
 import matplotlib.pyplot as plt
 import utils
+import inference
 from chunk import Chunk
 from figures import BLUE, RED, SIZE, set_limits, plot_coords, color_isvalid
 from descartes.patch import PolygonPatch
+import torch
+import torch.nn as nn
 
 
 if __name__ == "__main__":
@@ -36,4 +39,10 @@ if __name__ == "__main__":
     plt.gca().set_aspect('equal')
 
     plt.show()
+    input_data_addr = '/Users/venus/AI_lift/multi_section/data/z-3-50-30.csv'
+    model_address = '/Users/venus/AI_lift/multi_section/model/model_state_dict_3Apr_mm'
+    model = inference.Lift_base_network()
+    model.load_state_dict(torch.load(model_address))
+    Data = inference.preprocess(input_data_addr)
+    Cl_map = inference.inference(Data, model)
     print("lsfajlfjalfj")
