@@ -44,4 +44,20 @@ class Chunk:
         Returns the polygon.
         """
         return Polygon([self.corner, self.centroid, self.projection])
-        
+    
+    def inference_data(self, Re, kappa, x_limit, y_limit, grid_size):
+        """
+        Returns data readu to be used in inference
+        """
+        AR = self.chunk_AR()
+        input_data = np.zeros((grid_size**2, 5))
+        input_data[:, 0] = AR
+        input_data[:, 1] = Re
+        input_data[:, 2] = kappa
+        x_range = np.linspace(0.1, x_limit, grid_size)
+        y_range = np.linspace(0.1, y_limit, grid_size)
+        mesh_grid = np.array([np.meshgrid(x_range, y_range)])
+        mesh_grid = mesh_grid.reshape(2, grid_size**2).T
+        input_data[:, 3] = mesh_grid[:, 0]
+        input_data[:, 4] = mesh_grid[:, 1]
+        return input_data

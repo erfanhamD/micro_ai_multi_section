@@ -43,6 +43,12 @@ if __name__ == "__main__":
     model_address = '/Users/venus/AI_lift/multi_section/model/model_state_dict_3Apr_mm'
     model = inference.Lift_base_network()
     model.load_state_dict(torch.load(model_address))
-    Data = inference.preprocess(input_data_addr)
+    Re = 50
+    kappa = 0.3
+    x_limit = 1
+    y_limit = 2.6
+    grid_size = 100
+    Data = chunk.inference_data(Re, kappa, x_limit, y_limit, grid_size)
+    Data = inference.preprocess(Data)
     Cl_map = inference.inference(Data, model)
     print("lsfajlfjalfj")
