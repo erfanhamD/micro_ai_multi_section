@@ -11,10 +11,16 @@ from shapely.geometry import Polygon, LineString
 DATA_DIR = CONF.DATA_DIR
 
 def polygon_generator(n_corners=4):
+    """
+    generates a random polygon with n_corners corners.
+    """
     corners = np.random.randint(0, 10, (n_corners, 2))
     return corners
 
 def calculate_center(corners):
+    """
+   Calculates the center of the polygon. 
+    """
     center = np.mean(corners, axis=0)
     return center
 
@@ -27,6 +33,9 @@ def load_section_geometry(section_file):
     return corners
 
 def project_center_to_side(corners, center):
+    """
+    Projects the center of the polygon to each of the sides. 
+    """
     corner_1 = corners[0]
     corner_2 = corners[1]
     side = corner_2 - corner_1
@@ -36,6 +45,9 @@ def project_center_to_side(corners, center):
     return projection
 
 def compute_aspect_ratio(projection, centeroid, vertex, tri_type):
+    """
+    Calculates the AR based on the triangle type. 
+    """
     x_dist = projection.distance(vertex)
     y_dist = centeroid.distance(projection)
     if tri_type:
@@ -70,7 +82,24 @@ def tri_type(om, oc):
         return 0
 
 def polygon_from_corners(corners):
+    """
+    Creates a shapely polygon from the corners.
+    """
     polygon = Polygon(corners)
     vertices = polygon.boundary.coords
     centeroid = polygon.centroid
     return polygon, vertices, centeroid
+
+def plot_chunk(polygon, vertices, corners, centeroid, projections):
+    """
+    Plots the chunks and the cross sections. 
+    """
+    centeroid_corner_line = [LineString([vertices[i], centeroid]) for i in range(len(vertices)-1)]
+    plt.scatter(*polygon.exterior.xy, color = 'k')
+    plt.plot(corners[:,0], corners[:,1], '--k')
+    plt.scatter(*centeroid.xy, color  = 'r', linewidths=30, alpha = 0.3)
+    for i in range(len(projections)):
+        plt.scatter(*projections[i].xy, color = 'orange')
+        plt.plot(*centeroid_corner_line[i].xy, '--b')
+    plt.gca().set_aspect('equal')
+    plt.show()
