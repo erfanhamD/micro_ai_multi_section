@@ -6,7 +6,9 @@ from config import CONF
 import shapely
 import matplotlib.pyplot as plt
 from shapely.geometry import Polygon, LineString
-
+import inference
+import torch
+import torch.nn as nn
 
 DATA_DIR = CONF.DATA_DIR
 
@@ -103,3 +105,29 @@ def plot_chunk(polygon, vertices, corners, centeroid, projections):
         plt.plot(*centeroid_corner_line[i].xy, '--b')
     plt.gca().set_aspect('equal')
     plt.show()
+
+def mask_section(Data):
+    # find the diameter of the grid
+    min_point = np.min(Data, axis=0)
+    max_point = np.max(Data, axis=0)
+    line_slope =(np.max(Data[:,1]) - np.min(Data[:,1]))/(np.max(Data[:,0]) - np.min(Data[:,0]))
+    point_slope = calc_slope(Data)
+    mask_l = point_slope <= line_slope
+    mask_u = point_slope > line_slope
+    upper_tri = Data[mask_u]
+    lower_tri = Data[mask_l]
+
+    # plt.scatter(upper_tri[:,0], upper_tri[:,1], color = 'r')
+    # plt.scatter(lower_tri[:,0], lower_tri[:,1], color = 'b')
+    # plt.figure()
+    # plt.scatter(Data[:,0], Data[:,1], color = 'k')
+    # plt.plot([min_point[0], max_point[0]], [min_point[1], max_point[1]], '--k')
+    # plt.show()
+    return mask_l, mask_u
+
+def calc_slope(Point):
+    """
+    Calculates the slope of the line.
+    """
+    slope = Point[:, 1]/Point[:, 0]
+    return slope

@@ -1,5 +1,12 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from shapely.geometry import LineString, Polygon
+import inference
+import os
+import torch
+import torch.nn as nn
+import utils
+from config import CONF
 
 from utils import line_angle_calc
 class Chunk:
@@ -58,6 +65,40 @@ class Chunk:
         y_range = np.linspace(0.1, y_limit, grid_size)
         mesh_grid = np.array([np.meshgrid(x_range, y_range)])
         mesh_grid = mesh_grid.reshape(2, grid_size**2).T
+        self.mesh_grid = mesh_grid
         input_data[:, 3] = mesh_grid[:, 0]
         input_data[:, 4] = mesh_grid[:, 1]
         return input_data
+
+    def chunk_lift(self):
+        """
+        Returns the lift of the chunk.
+        """
+        model_address = '/Users/venus/AI_lift/multi_section/model/model_state_dict_3Apr_mm'
+        model = inference.Lift_base_network()
+        model.load_state_dict(torch.load(model_address))
+        input_params = np.loadtxt(os.path.join(CONF.DATA_DIR, "input_params/input1.csv"), delimiter=',')
+        Re = input_params[0]
+        kappa = input_params[1]
+        x_limit = input_params[2]
+        y_limit = input_params[3]
+        grid_size = int(input_params[4])
+        Data = self.inference_data(Re, kappa, x_limit, y_limit, grid_size)
+        self.lower_tri_mask, self.upper_tri_mask = utils.mask_section(Data[:, -2:])
+        Data = inference.preprocess(Data)
+        Cl_map = inference.inference(Data, model)
+        self.Cl_lower = Cl_map[self.lower_tri_mask]
+        self.Cl_upper = Cl_map[self.upper_tri_mask]
+        if self.tri_type():
+            self.plot_quiver(self.Cl_lower, self.lower_tri_mask)
+            return self.Cl_lower, self.lower_tri_mask
+        else:
+            self.plot_quiver(self.Cl_upper, self.upper_tri_mask)
+            return self.Cl_upper, self.upper_tri_mask
+    
+    def plot_quiver(self, lift, mask):
+        """
+        Plots the quiver plot.
+        """
+
+        plt.quiver([self.mesh_grid[:, 0][mask], self.mesh_grid[:, 1][mask]], lift[:, 0], lift[:, 1])
