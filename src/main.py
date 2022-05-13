@@ -30,7 +30,7 @@ if __name__ == "__main__":
             patch = PolygonPatch(polygon, facecolor=chunk_color_list[jdx], edgecolor=color_isvalid(polygon, valid=chunk_color_list[jdx]), alpha=0.5, zorder=2)
             ax.add_patch(patch)
             polygon_centroid_coordinate = polygon.centroid.coords[0]
-            plt.text(polygon_centroid_coordinate[0], polygon_centroid_coordinate[1], str(idx))
+            plt.text(polygon_centroid_coordinate[0], polygon_centroid_coordinate[1], str(jdx))
     chunk.chunk_lift()
     utils.plot_chunk(polygon, vertices, corners, centeroid, projections)
     # model_address = '/Users/venus/AI_lift/multi_section/model/model_state_dict_3Apr_mm'
