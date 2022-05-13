@@ -28,8 +28,10 @@ def plot_coords(ax, ob, color=GRAY, zorder=1, alpha=1):
     ax.plot(x, y, 'o', color=color, zorder=zorder, alpha=alpha)
 
 
-def color_isvalid(ob, valid=BLUE, invalid=RED):
-    if ob.is_valid:
+def color_isvalid(ob):
+    invalid=BLUE
+    valid=RED
+    if ob.tri_type():
         return valid
     else:
         return invalid

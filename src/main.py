@@ -21,16 +21,18 @@ if __name__ == "__main__":
     chunk_color_list = [BLUE, RED]
     fig = plt.figure(1, figsize=SIZE, dpi=90)
     ax = fig.add_subplot(111)
+    chunk_label = 0
     for idx, edge in enumerate(edges):
         for jdx, vertex in enumerate(edge.boundary):
             chunk = Chunk(centeroid, vertex, projections[idx])
             chunks.append(chunk)
             polygon = chunk.polygon()
             plot_coords(ax, polygon.exterior)
-            patch = PolygonPatch(polygon, facecolor=chunk_color_list[jdx], edgecolor=color_isvalid(polygon, valid=chunk_color_list[jdx]), alpha=0.5, zorder=2)
+            patch = PolygonPatch(polygon, facecolor=chunk_color_list[chunk.tri_type()], edgecolor=color_isvalid(chunk), alpha=0.5, zorder=2)
             ax.add_patch(patch)
             polygon_centroid_coordinate = polygon.centroid.coords[0]
-            plt.text(polygon_centroid_coordinate[0], polygon_centroid_coordinate[1], str(jdx))
+            plt.text(polygon_centroid_coordinate[0], polygon_centroid_coordinate[1], str(chunk_label))
+            chunk_label += 1
     chunk.chunk_lift()
     utils.plot_chunk(polygon, vertices, corners, centeroid, projections)
     # model_address = '/Users/venus/AI_lift/multi_section/model/model_state_dict_3Apr_mm'
