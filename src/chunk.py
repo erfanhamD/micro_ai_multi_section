@@ -16,8 +16,35 @@ class Chunk:
         self.corner = corner
         self.oc = LineString([self.corner, self.centroid])
         self.om = LineString([self.projection, self.centroid])
-
     
+    def mosoli_triangle(self):
+        """
+        Returns the mosoli triangle.
+        """
+        if self.tri_type():
+            mosol = np.array([[0, 0, 1], [1, 0 ,1], [1, 1, 1]])
+            # self.transform_from_mosoli_to_chunk(mosol)
+            return mosol
+        else:
+            mosol = np.array([[0, 0, 1], [0, 1, 1], [1, 1, 1]])
+            # self.transform_from_mosoli_to_chunk(mosol)
+            return mosol
+
+    def transform_from_mosoli_to_chunk(self):
+        """
+        Transforms the mosoli triangle to the chunk.
+        """
+        mosol = self.mosoli_triangle()
+        polygon_xy = self.polygon().exterior.coords.xy
+        polygon_x = polygon_xy[0]
+        polygon_y = polygon_xy[1]
+        homogenous_chunk = np.zeros((3, 3))
+        homogenous_chunk[:, 0] = polygon_x[:-1]
+        homogenous_chunk[:, 1] = polygon_y[:-1]
+        homogenous_chunk[:, 2] = 1
+        self.transformation = homogenous_chunk @ np.linalg.inv(mosol)
+        return self.transformation
+        
     def line_angle_calc(self):
         horizon_line = [1, 0]
         om_dir = np.array(self.om)[1]-np.array(self.om)[0]

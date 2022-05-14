@@ -13,7 +13,7 @@ import torch.nn as nn
 
 
 if __name__ == "__main__":
-    corners = utils.load_section_geometry("section_0.csv")
+    corners = utils.load_section_geometry("section_1.csv")
     polygon, vertices, centeroid = utils.polygon_from_corners(corners)
     edges = [LineString(vertices[k:k+2]) for k in range(len(vertices) - 1)]
     projections = [edges[i].interpolate(edges[i].project(centeroid)) for i in range(len(edges))]
@@ -25,6 +25,7 @@ if __name__ == "__main__":
     for idx, edge in enumerate(edges):
         for jdx, vertex in enumerate(edge.boundary):
             chunk = Chunk(centeroid, vertex, projections[idx])
+            chunk.transform_from_mosoli_to_chunk()
             chunks.append(chunk)
             polygon = chunk.polygon()
             plot_coords(ax, polygon.exterior)
@@ -33,8 +34,9 @@ if __name__ == "__main__":
             polygon_centroid_coordinate = polygon.centroid.coords[0]
             plt.text(polygon_centroid_coordinate[0], polygon_centroid_coordinate[1], str(chunk_label))
             chunk_label += 1
-    chunk.chunk_lift()
-    utils.plot_chunk(polygon, vertices, corners, centeroid, projections)
+    plt.show()
+    # chunk.chunk_lift()
+    # utils.plot_chunk(polygon, vertices, corners, centeroid, projections)
     # model_address = '/Users/venus/AI_lift/multi_section/model/model_state_dict_3Apr_mm'
     # model = inference.Lift_base_network()
     # model.load_state_dict(torch.load(model_address))
