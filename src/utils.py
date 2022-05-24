@@ -32,6 +32,7 @@ def load_section_geometry(section_file):
     """
     section_addr = os.path.join(DATA_DIR, f"section/{section_file}")
     corners = np.loadtxt(section_addr, dtype=np.float32, delimiter=',')
+    
     return corners
 
 def project_center_to_side(corners, center):
