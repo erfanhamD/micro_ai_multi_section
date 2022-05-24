@@ -84,8 +84,8 @@ class Chunk:
         input_data[:, 0] = AR
         input_data[:, 1] = Re
         input_data[:, 2] = kappa
-        x_range = np.linspace(0.1, x_limit, grid_size)
-        y_range = np.linspace(0.1, y_limit, grid_size)
+        x_range = np.linspace(0.001, x_limit, grid_size)
+        y_range = np.linspace(0.001, y_limit, grid_size)
         mesh_grid = np.array([np.meshgrid(x_range, y_range)])
         mesh_grid = mesh_grid.reshape(2, grid_size**2).T
         self.mesh_grid = mesh_grid
@@ -131,7 +131,7 @@ class Chunk:
         else:
             self.mask = self.upper_tri_mask
             self.base_points = self.mesh_grid[self.mask]
-        plt.scatter(self.base_points[:, 0], self.base_points[:, 1], s=1, c='k')
+        # plt.scatter(self.base_points[:, 0], self.base_points[:, 1], s=1, c='k')
 
     def plot_quiver(self, lift, mask):
         """
@@ -142,9 +142,14 @@ class Chunk:
         transformed_mesh_grid[:2, :] = transformed_mesh_grid[:2, :]/transformed_mesh_grid[2, :]
         transformed_lift = self.transformation @ np.c_[lift, np.ones(lift.shape[0])].T
         transformed_lift[:2, :] = transformed_lift[:2, :]/transformed_lift[2, :]
-        plt.scatter(transformed_mesh_grid.T[:, 0], transformed_mesh_grid.T[:, 1], color = 'red')
-        plt.scatter(self.mesh_grid[mask, 0], self.mesh_grid[mask, 1])
-        X, Y = np.meshgrid(transformed_mesh_grid.T[:, 0], transformed_mesh_grid.T[:, 1])
-        U, V = np.meshgrid(transformed_lift[0, :], transformed_lift[1, :])
-        plt.quiver(X, Y, U, V, color='blue')
+        # plt.scatter(transformed_mesh_grid.T[:, 0], transformed_mesh_grid.T[:, 1], color = 'red')
+        # plt.scatter(self.mesh_grid[mask, 0], self.mesh_grid[mask, 1])
+        # X, Y = np.meshgrid(transformed_mesh_grid.T[:, 0], transformed_mesh_grid.T[:, 1])
+        x = transformed_mesh_grid.T[:, 0]
+        y = transformed_mesh_grid.T[:, 1]
+        u = transformed_lift.T[:, 0]
+        v = transformed_lift.T[:, 1]
+        # U, V = np.meshgrid(transformed_lift[0, :], transformed_lift[1, :])
+        plt.quiver(x, y, u, v, scale=40, headwidth = 3, width = 0.005, color='blue')
+        print("Plotting quiver plot")
     
