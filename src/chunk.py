@@ -89,8 +89,8 @@ class Chunk:
         mesh_grid = np.array([np.meshgrid(x_range, y_range)])
         mesh_grid = mesh_grid.reshape(2, grid_size**2).T
         self.mesh_grid = mesh_grid
-        input_data[:, 3] = mesh_grid[:, 0]
-        input_data[:, 4] = mesh_grid[:, 1]
+        input_data[:, 3] = mesh_grid[:, 1]
+        input_data[:, 4] = mesh_grid[:, 0]
         return input_data
 
     def chunk_lift(self):
@@ -115,6 +115,7 @@ class Chunk:
         self.base_triangle(Data)
         Data = inference.preprocess(Data)
         Cl_map = inference.inference(Data, model)
+        # Cl_map = np.loadtxt("/Users/venus/AI_lift/evaluation/inference_data/Cl_map_test_infer.csv")
         self.Cl_lower = Cl_map[self.lower_tri_mask]
         self.Cl_upper = Cl_map[self.upper_tri_mask]
         if self.tri_type():
@@ -140,7 +141,7 @@ class Chunk:
         self.transform_from_mosoli_to_chunk()
         transformed_mesh_grid = self.transformation @ np.array([self.mesh_grid[mask, 0], self.mesh_grid[mask, 1], np.ones(self.mesh_grid[mask,:].shape[0])])
         transformed_mesh_grid[:2, :] = transformed_mesh_grid[:2, :]/transformed_mesh_grid[2, :]
-        transformed_lift = self.transformation @ np.c_[lift, np.ones(lift.shape[0])].T
+        transformed_lift = self.transformation @ np.c_[lift[:, 1],lift[:, 0], np.ones(lift.shape[0])].T
         transformed_lift[:2, :] = transformed_lift[:2, :]/transformed_lift[2, :]
         # plt.scatter(transformed_mesh_grid.T[:, 0], transformed_mesh_grid.T[:, 1], color = 'red')
         # plt.scatter(self.mesh_grid[mask, 0], self.mesh_grid[mask, 1])
@@ -150,6 +151,7 @@ class Chunk:
         u = transformed_lift.T[:, 0]
         v = transformed_lift.T[:, 1]
         # U, V = np.meshgrid(transformed_lift[0, :], transformed_lift[1, :])
-        plt.quiver(x, y, u, v, scale=40, headwidth = 3, width = 0.005, color='blue')
+        # plt.quiver(x, y, u, v, scale=20, headwidth = 3, width = 0.005, color='blue')
+        plt.quiver(x, y, u, v)
         print("Plotting quiver plot")
     

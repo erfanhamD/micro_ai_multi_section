@@ -14,7 +14,7 @@ import torch.nn as nn
 
 if __name__ == "__main__":
 
-    corners = utils.load_section_geometry("section_3.csv")
+    corners = utils.load_section_geometry("section_0.csv")
     centeroid_ = Polygon(corners).centroid
     corners = corners - centeroid_
     polygon, vertices, centeroid = utils.polygon_from_corners(corners)
@@ -39,7 +39,7 @@ if __name__ == "__main__":
             plt.text(polygon_centroid_coordinate[0], polygon_centroid_coordinate[1], str(chunk_label))
             chunk_label += 1
     # plt.show()
-    #chunks[7].chunk_lift()
+    # chunks[3].chunk_lift()
     # plt.show()
     # chunks[1].chunk_lift()
     for ch in chunks:

@@ -111,7 +111,7 @@ def mask_section(Data):
     # find the diameter of the grid
     min_point = np.min(Data, axis=0)
     max_point = np.max(Data, axis=0)
-    line_slope =(np.max(Data[:,1]) - np.min(Data[:,1]))/(np.max(Data[:,0]) - np.min(Data[:,0]))
+    line_slope =(np.max(Data[:,0]) - np.min(Data[:,0]))/(np.max(Data[:,1]) - np.min(Data[:,1]))
     point_slope = calc_slope(Data)
     mask_l = point_slope <= line_slope
     mask_u = point_slope > line_slope
@@ -130,5 +130,5 @@ def calc_slope(Point):
     """
     Calculates the slope of the line.
     """
-    slope = Point[:, 1]/Point[:, 0]
+    slope = Point[:, 0]/Point[:, 1]
     return slope
