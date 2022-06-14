@@ -14,7 +14,7 @@ import torch.nn as nn
 
 if __name__ == "__main__":
 
-    corners = utils.load_section_geometry("section_0.csv")
+    corners = utils.load_section_geometry("semi_circle.csv")
     centeroid_ = Polygon(corners).centroid
     corners = corners - centeroid_
     polygon, vertices, centeroid = utils.polygon_from_corners(corners)
@@ -30,6 +30,8 @@ if __name__ == "__main__":
         for jdx, vertex in enumerate(edge.boundary):
             chunk = Chunk(centeroid, vertex, projections[idx])
             # chunk.transform_from_mosoli_to_chunk()
+            if chunk.polygon().area == 0:
+                continue
             chunks.append(chunk)
             polygon = chunk.polygon()
             plot_coords(ax, polygon.exterior)
@@ -37,11 +39,15 @@ if __name__ == "__main__":
             ax.add_patch(patch)
             polygon_centroid_coordinate = polygon.centroid.coords[0]
             plt.text(polygon_centroid_coordinate[0], polygon_centroid_coordinate[1], str(chunk_label))
+            # make axis scale equal 
+            ax.set_aspect('equal', 'box')
+            
             chunk_label += 1
-    # plt.show()
     # chunks[3].chunk_lift()
-    # plt.show()
-    # chunks[1].chunk_lift()
-    for ch in chunks:
-        ch.chunk_lift()
+    total_chunk = []
+    for id, ch in enumerate(chunks):
+        chunk_CL = ch.chunk_lift(id)
+        total_chunk.extend(chunk_CL)
+    total_chunk = np.array(total_chunk)
+    np.savetxt(os.path.join(CONF.OUTPUT_DIR , "Section_CL.csv"), total_chunk, delimiter=",")
     plt.show()

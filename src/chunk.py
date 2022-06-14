@@ -22,9 +22,10 @@ class Chunk:
         Returns the mosoli triangle.
         """
         if self.tri_type():
-            mosol = np.array([[self.x_limit, self.y_limit, 1], [0, 0, 1], [self.x_limit, 0 ,1], [self.x_limit, self.y_limit, 1]])
+            mosol = np.array([[self.AR, 1, 1], [0, 0, 1], [self.AR, 0 ,1], [self.AR, 1, 1]])
         else:
-            mosol = np.array([[self.x_limit, self.y_limit, 1], [0, 0, 1], [0, self.y_limit ,1], [self.x_limit, self.y_limit, 1]])
+            # mosol = np.array([[self.x_limit, self.y_limit, 1], [0, 0, 1], [0, self.y_limit ,1], [self.x_limit, self.y_limit, 1]])
+            mosol = np.array([[self.AR, 1, 1], [0, 0, 1], [0, 1, 1], [self.AR, 1, 1]])
         # self.transform_from_mosoli_to_chunk(mosol)
         return mosol.T
 
@@ -33,11 +34,13 @@ class Chunk:
         Transforms the mosoli triangle to the chunk.
         """
         mosol = self.mosoli_triangle()
+        # plt.scatter(mosol[0, :], mosol[1, :], color = "green")
         polygon_xy = self.polygon().exterior.coords.xy
         polygon_x = polygon_xy[0]
         polygon_y = polygon_xy[1]
         homogenous_coord = np.ones(4)
         homogenous_chunk = np.stack((polygon_x, polygon_y, homogenous_coord), axis=0)
+        # plt.scatter(homogenous_chunk[0, :], homogenous_chunk[1, :], color='y')
         self.transformation = homogenous_chunk[:, :-1] @ np.linalg.inv(mosol[:, :-1])
         return self.transformation
 
@@ -82,21 +85,27 @@ class Chunk:
         AR = self.chunk_AR()
         input_data = np.zeros((grid_size**2, 5))
         input_data[:, 0] = AR
+        self.AR = AR
         input_data[:, 1] = Re
         input_data[:, 2] = kappa
-        x_range = np.linspace(0.001, x_limit, grid_size)
-        y_range = np.linspace(0.001, y_limit, grid_size)
+        self.kappa = kappa
+        x_range = np.linspace(0.001, AR-kappa-0.1, grid_size)
+        y_range = np.linspace(0.001, 0.9-kappa, grid_size)
+        # x_range = np.linspace(0.001, self.x_limit-kappa, grid_size)
+        # y_range = np.linspace(0.001, self.y_limit-kappa, grid_size)
         mesh_grid = np.array([np.meshgrid(x_range, y_range)])
         mesh_grid = mesh_grid.reshape(2, grid_size**2).T
         self.mesh_grid = mesh_grid
+
         input_data[:, 3] = mesh_grid[:, 1]
         input_data[:, 4] = mesh_grid[:, 0]
         return input_data
 
-    def chunk_lift(self):
+    def chunk_lift(self, id):
         """
         Returns the lift of the chunk.
         """
+        self.id = id
         model_address = '/Users/venus/AI_lift/multi_section/model/model_state_dict_3Apr_mm'
         model = inference.Lift_base_network()
         model.load_state_dict(torch.load(model_address))
@@ -111,7 +120,9 @@ class Chunk:
             self.y_limit = self.om.length 
         grid_size = int(input_params[4])
         Data = self.inference_data(Re, kappa, self.x_limit, self.y_limit, grid_size)
-        self.lower_tri_mask, self.upper_tri_mask = utils.mask_section(Data[:, -2:])
+        self.lower_tri_mask, self.upper_tri_mask = utils.mask_section(Data[:, -2:], [self.x_limit, self.y_limit])
+        # plt.scatter(self.mesh_grid[:, 0], self.mesh_grid[:, 1], color="k")
+        # plt.scatter(self.mesh_grid[self.lower_tri_mask, 0], self.mesh_grid[self.lower_tri_mask, 1], color="r")
         self.base_triangle(Data)
         Data = inference.preprocess(Data)
         Cl_map = inference.inference(Data, model)
@@ -119,11 +130,11 @@ class Chunk:
         self.Cl_lower = Cl_map[self.lower_tri_mask]
         self.Cl_upper = Cl_map[self.upper_tri_mask]
         if self.tri_type():
-            self.plot_quiver(self.Cl_lower, self.lower_tri_mask)
-            return self.Cl_lower, self.lower_tri_mask
+            chunk_CL =  self.plot_quiver(self.Cl_lower, self.lower_tri_mask)
+            return chunk_CL
         else:
-            self.plot_quiver(self.Cl_upper, self.upper_tri_mask)
-            return self.Cl_upper, self.upper_tri_mask
+            chunk_CL = self.plot_quiver(self.Cl_upper, self.upper_tri_mask)
+            return chunk_CL
     
     def base_triangle(self, Data):
         if self.tri_type():
@@ -138,20 +149,25 @@ class Chunk:
         """
         Plots the quiver plot.
         """
+        
+        # plt.scatter(self.mesh_grid[mask, 0], self.mesh_grid[mask, 1])
         self.transform_from_mosoli_to_chunk()
         transformed_mesh_grid = self.transformation @ np.array([self.mesh_grid[mask, 0], self.mesh_grid[mask, 1], np.ones(self.mesh_grid[mask,:].shape[0])])
         transformed_mesh_grid[:2, :] = transformed_mesh_grid[:2, :]/transformed_mesh_grid[2, :]
         transformed_lift = self.transformation @ np.c_[lift[:, 1],lift[:, 0], np.ones(lift.shape[0])].T
         transformed_lift[:2, :] = transformed_lift[:2, :]/transformed_lift[2, :]
         # plt.scatter(transformed_mesh_grid.T[:, 0], transformed_mesh_grid.T[:, 1], color = 'red')
-        # plt.scatter(self.mesh_grid[mask, 0], self.mesh_grid[mask, 1])
         # X, Y = np.meshgrid(transformed_mesh_grid.T[:, 0], transformed_mesh_grid.T[:, 1])
         x = transformed_mesh_grid.T[:, 0]
         y = transformed_mesh_grid.T[:, 1]
         u = transformed_lift.T[:, 0]
         v = transformed_lift.T[:, 1]
+
         # U, V = np.meshgrid(transformed_lift[0, :], transformed_lift[1, :])
         # plt.quiver(x, y, u, v, scale=20, headwidth = 3, width = 0.005, color='blue')
         plt.quiver(x, y, u, v)
         print("Plotting quiver plot")
+        chunk_CL = np.stack((x, y, u, v), axis = 1)
+        # np.savetxt(os.path.join(CONF.OUTPUT_DIR, f"chunk_{self.id}_CL.csv"), chunk_CL, delimiter=',')
+        return chunk_CL
     

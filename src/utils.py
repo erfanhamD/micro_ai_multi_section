@@ -107,13 +107,15 @@ def plot_chunk(polygon, vertices, corners, centeroid, projections):
     plt.gca().set_aspect('equal')
     plt.show()
 
-def mask_section(Data):
+def mask_section(Data, limits):
     # find the diameter of the grid
+    [x_limit, y_limit] = limits
     min_point = np.min(Data, axis=0)
     max_point = np.max(Data, axis=0)
     line_slope =(np.max(Data[:,0]) - np.min(Data[:,0]))/(np.max(Data[:,1]) - np.min(Data[:,1]))
+    line_slope = y_limit/x_limit
     point_slope = calc_slope(Data)
-    mask_l = point_slope <= line_slope
+    mask_l = point_slope < line_slope
     mask_u = point_slope > line_slope
     upper_tri = Data[mask_u]
     lower_tri = Data[mask_l]

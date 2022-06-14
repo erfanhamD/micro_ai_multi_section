@@ -20,7 +20,7 @@ class Lift_base_network(nn.Module):
 
 def preprocess(Data):
     # Data = pd.read_csv(Data_addr, header = None, delimiter=',')
-    Data[4] = Data[4]/Data[0]
+    Data[:,4] = Data[:, 4]/Data[:, 0]
     scaler = pickle.load(open('/Users/venus/AI_lift/multi_section/model/x_mm_scaler.pkl', 'rb'))
     Data = scaler.transform(Data)
     return Data
